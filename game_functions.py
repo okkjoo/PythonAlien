@@ -1,23 +1,50 @@
+"""
+    包含完成游戏的大部分工作的函数
+    check_events()检测相关事件如按键和松开
+        其中有辅助函数check_keydown_events 和 check_keyup_events
+        来处理这些事件
+    update_screen()用于在每次执行主循环时重绘屏幕
+"""
 import sys
 import pygame
+def check_keydown_events(event,ship):
+    """响应按键"""
+    if event.key == pygame.K_RIGHT:
+        ship.moving_right = True
+    elif event.key == pygame.K_LEFT:
+        ship.moving_left = True
+def check_keyup_events(event,ship):
+    """"响应松开"""
+    if event.key == pygame.K_RIGHT:
+        ship.moving_right = False
+    elif event.key == pygame.K_LEFT:
+        ship.moving_left = False
 def check_events(ship):
     """响应鼠标和按键事件"""
+    # for event in pygame.event.get():
+    #     if event.type == pygame.QUIT:
+    #         sys.exit()
+    #     elif event.type == pygame.KEYDOWN:
+    #         if event.key == pygame.K_RIGHT:
+    #             #向右移动飞船
+    #             ship.moving_right = True
+    #         elif event.key == pygame.K_LEFT:
+    #             #向左移动飞船
+    #             ship.moving_left = True
+            
+    #     elif event.type == pygame.KEYUP:
+    #         if event.key == pygame.K_RIGHT:
+    #             ship.moving_right = False
+    #         elif event.key == pygame.K_LEFT:
+    #             ship.moving_left = False
+    #重构 上面注释的代码可以不看
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_RIGHT:
-                #向右移动飞船
-                ship.moving_right = True
-            elif event.key == pygame.K_LEFT:
-                #向左移动飞船
-                ship.moving_left = True
-            
+            check_keydown_events(event,ship)
         elif event.type == pygame.KEYUP:
-            if event.key == pygame.K_RIGHT:
-                ship.moving_right = False
-            elif event.key == pygame.K_LEFT:
-                ship.moving_left = False
+            check_keyup_events(event,ship)
 def update_screen(ai_settings,screen,ship):
     """更新屏幕上的图像，并切换到新屏幕"""
     #每次循环都会重绘屏幕

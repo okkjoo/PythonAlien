@@ -1,3 +1,9 @@
+"""
+    包含Ship类，其中包含方法__init__(),
+                update()管理飞船位置
+                blitme()在屏幕上绘制飞船的方法
+                表示飞船的图像存储在images的ship.bmp中
+"""
 import pygame
 class Ship():
     def __init__(self,ai_settings,screen) :#第三个参数指定要将飞船绘制到什么地方
@@ -20,6 +26,7 @@ class Ship():
     def update(self):
         """根据移动标志调整飞船的位置"""
         #更新飞船的center值，而不是rect
+        #修改self.center的值之前检查飞船位置，确保飞船在屏幕内
         if self.moving_right and self.rect.right<self.screen_rect.right:
             self.center += self.ai_settings.ship_speed_factor 
         if self.moving_left and self.rect.left >0:

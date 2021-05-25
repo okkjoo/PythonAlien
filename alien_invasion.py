@@ -1,3 +1,15 @@
+"""
+    创建一系列整个游戏都要用到的对象：
+        存储在ai_settings中的设置
+        存储在screen中的主显示surface
+        一个飞船实例
+    包含游戏的主循环while：
+        在其中调用了 check_events()
+                    ship.update()
+                    update_screen()
+    要启动该游戏 只需运行该文件，其他文件包含的代码被直接或间接地导入这个文件中
+    
+"""    
 import pygame
 from settings import Settings
 from ship import Ship
