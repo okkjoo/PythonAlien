@@ -61,6 +61,7 @@ def check_play_button(ai_settings,screen,stats,sb,play_button,ship,aerolites,bul
         sb.prep_score()
         sb.prep_high_score()
         sb.prep_level()
+        sb.prep_ships()
         #清空陨石列表和子弹列表
         aerolites.empty()
         bullets.empty()
@@ -156,11 +157,13 @@ def change_fleet_direction(ai_settings,aerolites):
         aerolite.rect.y += ai_settings.fleet_drop_speed
     ai_settings.fleet_direction *= -1
 
-def ship_hit(ai_settings,stats,screen,ship,aerolites,bullets):
+def ship_hit(ai_settings,screen,stats,sb,ship,aerolites,bullets):
     """响应被外星人撞到的飞船"""
     if stats.ships_left > 0:
         #ship_left-1
         stats.ships_left -= 1
+        #更新记分牌
+        sb.prep_ships()
         #清空陨石列表和子弹列表
         aerolites.empty()
         bullets.empty()
@@ -173,23 +176,23 @@ def ship_hit(ai_settings,stats,screen,ship,aerolites,bullets):
         stats.game_active = False
         pygame.mouse.set_visible(True)
 
-def check_aerolites_bottom(ai_settings,stats,screen,ship,aerolites,bullets):
+def check_aerolites_bottom(ai_settings,screen,stats,sb,ship,aerolites,bullets):
     """检查是否有陨石到达了屏幕底部"""
     screen_rect = screen.get_rect()
     for aerolite in aerolites.sprites():
         if aerolite.rect.bottom > screen_rect.bottom:
             #像飞船被撞到了一个处理
-            ship_hit(ai_settings,stats,screen,ship,aerolites,bullets)
+            ship_hit(ai_settings,screen,stats,sb,ship,aerolites,bullets)
             break
-def update_aerolites(ai_settings,stats,screen,ship,aerolites,bullets):
+def update_aerolites(ai_settings,screen,stats,sb,ship,aerolites,bullets):
     """检查是否有陨石位于屏幕边缘，并更新陨石群的位置"""
     check_fleet_edges(ai_settings,aerolites)
     aerolites.update()
     #检测陨石与飞机的碰撞
     if pygame.sprite.spritecollideany(ship,aerolites):
-        ship_hit(ai_settings,stats,screen,ship,aerolites,bullets)
+        ship_hit(ai_settings,screen,stats,sb,ship,aerolites,bullets)
     # 检查陨石是否有到达屏幕底部
-    check_aerolites_bottom(ai_settings,stats,screen,ship,aerolites,bullets)
+    check_aerolites_bottom(ai_settings,screen,stats,sb,ship,aerolites,bullets)
 
 def check_high_score(stats,sb):
     """检查是否诞生了新的最高分"""

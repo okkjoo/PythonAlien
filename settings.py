@@ -18,7 +18,7 @@ class Settings():
 
         #子弹设置
         #创建宽3像素，高15像素的深灰色子弹，速递比飞船稍低,限制未消失的子弹为3颗
-        self.bullet_width = 30000
+        self.bullet_width = 3
         self.bullet_height = 15
         self.bullet_color = 60,60,60
         self.bullet_allowed = 3
