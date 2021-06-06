@@ -33,7 +33,7 @@ def check_keyup_events(event,ship):
         ship.moving_right = False
     elif event.key == pygame.K_LEFT:
         ship.moving_left = False
-def check_events(ai_settings,screen,stats,play_button,ship,aerolites,bullets):
+def check_events(ai_settings,screen,stats,sb,play_button,ship,aerolites,bullets):
     """响应鼠标和按键事件"""
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -44,15 +44,23 @@ def check_events(ai_settings,screen,stats,play_button,ship,aerolites,bullets):
             check_keyup_events(event,ship)
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mouse_x,mouse_y = pygame.mouse.get_pos()
-            check_play_button(ai_settings,screen,stats,play_button,ship,aerolites,bullets,mouse_x,mouse_y)
+            check_play_button(ai_settings,screen,stats,sb,play_button,ship,aerolites,bullets,mouse_x,mouse_y)
 
-def check_play_button(ai_settings,screen,stats,play_button,ship,aerolites,bullets,mouse_x,mouse_y):
+def check_play_button(ai_settings,screen,stats,sb,play_button,ship,aerolites,bullets,mouse_x,mouse_y):
     """在玩家单击play按钮的时候开始新游戏"""
     button_clicked = play_button.rect.collidepoint(mouse_x,mouse_y)
     if button_clicked and not  stats.game_active:
+        #重置游戏设置
+        ai_settings.initialize_dynamic_settings()
+        #隐藏光标
+        pygame.mouse.set_visible(False)
         #重置游戏统计信息
         stats.reset_stats()
         stats.game_active = True
+        #重置记分牌图像
+        sb.prep_score()
+        sb.prep_high_score()
+        sb.prep_level()
         #清空陨石列表和子弹列表
         aerolites.empty()
         bullets.empty()
@@ -60,7 +68,7 @@ def check_play_button(ai_settings,screen,stats,play_button,ship,aerolites,bullet
         create_fleet(ai_settings,screen,ship,aerolites)
         ship.center_ship()
 
-def update_screen(ai_settings,screen,stats,ship,aerolites,bullets,play_button):
+def update_screen(ai_settings,screen,stats,sb,ship,aerolites,bullets,play_button):
     """更新屏幕上的图像，并切换到新屏幕"""
     #每次循环都会重绘屏幕
     screen.fill(ai_settings.bg_color)
@@ -69,12 +77,14 @@ def update_screen(ai_settings,screen,stats,ship,aerolites,bullets,play_button):
         bullet.draw_bullet();
     ship.blitme()
     aerolites.draw(screen)
+    #显示得分
+    sb.show_score()
     #如果游戏处于非活动状态，就绘制play按钮
     if not stats.game_active:
         play_button.draw_button()
     #让最近绘制的屏幕可见
     pygame.display.flip()
-def update_bullets(ai_settings,screen,ship,aerolites,bullets):
+def update_bullets(ai_settings,screen,stats,sb,ship,aerolites,bullets):
     """更新子弹的位置，并删除已消失的子弹"""
     #更新子弹的位置
     bullets.update()
@@ -82,15 +92,24 @@ def update_bullets(ai_settings,screen,ship,aerolites,bullets):
     for bullet in bullets.copy():  # 遍历编组的副本，这样才能在循环中修改bullets
         if bullet.rect.bottom <= 0:
             bullets.remove(bullet)
-    check_bullets_aerolite_colloisions(ai_settings,screen,ship,aerolites,bullets)
+    check_bullets_aerolite_colloisions(ai_settings,screen,stats,sb,ship,aerolites,bullets)
 
-def check_bullets_aerolite_colloisions(ai_settings,screen,ship,aerolites,bullets):
+def check_bullets_aerolite_colloisions(ai_settings,screen,stats,sb,ship,aerolites,bullets):
     """响应子弹和陨石的碰撞"""
     #删除发生碰撞的子弹与陨石
     collisions = pygame.sprite.groupcollide(bullets,aerolites,True,True)
+    if collisions:
+        for aerolites in collisions.values():
+            stats.score += ai_settings.aerolite_points*len(aerolites)
+            sb.prep_score()
+        check_high_score(stats,sb)
     if len(aerolites) == 0: #检查陨石群是否已被消灭完，如果被消灭完了：
+        #提高等级
+        stats.level += 1
+        sb.prep_level()
         #删除现有的子弹并重新创建陨石群
         bullets.empty()
+        ai_settings.increase_speed()
         create_fleet(ai_settings, screen, ship, aerolites)
 
 def get_number_aerolite_x(ai_settings,aerolite_width):
@@ -152,6 +171,7 @@ def ship_hit(ai_settings,stats,screen,ship,aerolites,bullets):
         sleep(1)
     else:
         stats.game_active = False
+        pygame.mouse.set_visible(True)
 
 def check_aerolites_bottom(ai_settings,stats,screen,ship,aerolites,bullets):
     """检查是否有陨石到达了屏幕底部"""
@@ -170,3 +190,9 @@ def update_aerolites(ai_settings,stats,screen,ship,aerolites,bullets):
         ship_hit(ai_settings,stats,screen,ship,aerolites,bullets)
     # 检查陨石是否有到达屏幕底部
     check_aerolites_bottom(ai_settings,stats,screen,ship,aerolites,bullets)
+
+def check_high_score(stats,sb):
+    """检查是否诞生了新的最高分"""
+    if  stats.score > stats.high_score:
+        stats.high_score = stats.score
+        sb.prep_high_score()

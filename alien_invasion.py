@@ -14,6 +14,7 @@ import pygame
 from pygame.sprite import Group
 from settings import Settings
 from game_stats import GameStats
+from scoreboard import  Scoreboard
 from button import Button
 from ship import Ship
 from aerolite import Aerolite
@@ -26,8 +27,9 @@ def run_game():
     pygame.display.set_caption("Aerolite Hit Airship")
     #创建play按钮
     play_button = Button(ai_settings,screen,"Play")
-    #创建一个用于存储游戏统计信息的实例
+    #创建一个用于存储游戏统计信息的实例，并创建记分牌
     stats = GameStats(ai_settings)
+    sb = Scoreboard(ai_settings,screen,stats)
     # 创建一艘飞船
     ship = Ship(ai_settings,screen)
     # 创建一个用于存储子弹的编组
@@ -39,11 +41,11 @@ def run_game():
     #开始游戏的主循环
     while True:
         #监视键盘和鼠标事件
-        gf.check_events(ai_settings,screen,stats,play_button,ship,aerolites,bullets)
+        gf.check_events(ai_settings,screen,stats,sb,play_button,ship,aerolites,bullets)
         if stats.game_active:
             ship.update()
-            gf.update_bullets(ai_settings,screen,ship,aerolites,bullets)
+            gf.update_bullets(ai_settings,screen,stats,sb,ship,aerolites,bullets)
             gf.update_aerolites(ai_settings,stats,screen,ship,aerolites,bullets)
             #每次循环时都重新绘制屏幕 让最近的屏幕绘制可见
-        gf.update_screen(ai_settings,screen,stats,ship,aerolites,bullets,play_button)
+        gf.update_screen(ai_settings,screen,stats,sb,ship,aerolites,bullets,play_button)
 run_game()
